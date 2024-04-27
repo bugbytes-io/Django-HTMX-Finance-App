@@ -1,0 +1,40 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        {% block head_title %}
+            Personal Finance Tracker
+        {% endblock %}
+    </title>
+
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@1.9.10" integrity="sha384-D1Kt99CQMDuVetoL1lrYwg5t+9QdHe7NLX/SoJYkXDFfX37iInKRy5xLSi8nO7UC" crossorigin="anonymous"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+
+    <!-- Custom files -->
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
+
+
+    {% block extra_head %}
+
+    {% endblock %}
+</head>
+<body>
+
+    {% include 'tracker/partials/navbar.html' %}
+
+    <div class="max-w-screen-lg mx-auto p-4">
+
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    
+</body>
+</html>

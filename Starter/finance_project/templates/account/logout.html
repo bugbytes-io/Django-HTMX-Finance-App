@@ -1,0 +1,26 @@
+{% extends "tracker/base.html" %}
+
+{% load i18n %}
+
+{% block head_title %}{% trans "Sign Out" %}{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center text-white">
+  <h1 class="text-4xl tracking-wide dark:text-white my-4">{% trans "Sign Out" %}</h1>
+
+  <p class="mt-2">{% trans 'Are you sure you want to sign out?' %}</p>
+
+  <form method="post" action="{% url 'account_logout' %}">
+    {% csrf_token %}
+
+    {% if redirect_field_value %}
+      <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+    {% endif %}
+
+    <button class="mt-6 bg-[#73B769] hover:bg-[#56964a] text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline" type="submit">
+      {% trans 'Sign Out' %}
+    </button>
+  </form>
+</div>
+
+{% endblock %}
