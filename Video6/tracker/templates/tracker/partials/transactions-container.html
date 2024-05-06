@@ -1,0 +1,101 @@
+{% load widget_tweaks %}
+{% load humanize %}
+
+<!-- Define Grid container div -->
+<div class="flex flex-col-reverse md:grid md:grid-cols-4 md:gap-4"
+    id="transaction-container">
+
+    <!-- 3/4 cols for the table of transactions -->
+    <div class="col-span-3">
+        <div class="my-4">
+            <h1 class="mt-4 mb-4 prose prose-2xl text-white">
+              Totals
+            </h1>
+
+            <table class="table">
+                <thead class="text-xs text-white uppercase">
+                    <tr>
+                        <th>Total Income</th>
+                        <th>Total Expenses</th>
+                        <th>Net Income</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>${{ total_income|floatformat:2|intcomma }}</td>
+                        <td>${{ total_expenses|floatformat:2|intcomma }}</td>
+                        <td>${{ net_income|floatformat:2|intcomma }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h1 class="mt-8 mb-4 prose prose-2xl text-white">
+            Transactions
+        </h1>
+
+        {% if filter.qs %}
+
+        <table class="table">
+            <thead class="text-xs text-white uppercase">
+                <tr>
+                    <th class="px-6 py-3">Date</th>
+                    <th class="px-6 py-3">Category</th>
+                    <th class="px-6 py-3">Type</th>
+                    <th class="px-6 py-3">Amount</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for transaction in filter.qs %}
+                    <tr>
+                        <td>{{ transaction.date }}</td>
+                        <td>{{ transaction.category }}</td>
+                        <td>{{ transaction.type }}</td>
+                        <td>{{ transaction.amount }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% else %}
+
+        <p class="text-2xl text-white">
+            No transactions found
+        </p>
+
+        {% endif %}
+    </div>
+
+    <!-- 1/4 cols for the filter form -->
+    <div class="col-span-1">
+        <form hx-get="{% url 'transactions-list' %}"
+            hx-target="#transaction-container"
+            hx-swap="outerHTML">
+            
+            <div class="mb-2 form-control">
+                {{ filter.form.transaction_type|add_label_class:"label text-white" }}
+                {% render_field filter.form.transaction_type class="select bg-gray-50 text-gray-900" %}
+            </div>
+
+            <div class="mb-2 form-control">
+                {{ filter.form.start_date|add_label_class:"label text-white" }}
+                {% render_field filter.form.start_date class="input bg-gray-50 text-gray-900" %}
+            </div>
+            
+            <div class="mb-2 form-control">
+                {{ filter.form.end_date|add_label_class:"label text-white" }}
+                {% render_field filter.form.end_date class="input bg-gray-50 text-gray-900" %}
+            </div>   
+
+            <div class="mb-4 form-control">
+                {% render_field filter.form.category class="text-green-500 border-gray-300 rounded focus:ring-green-500" %}
+            </div>
+
+            <button class="btn btn-success">
+                Filter
+            </button>        
+        </form>
+    </div>
+</div>
