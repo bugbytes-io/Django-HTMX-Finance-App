@@ -1,0 +1,59 @@
+{% extends "tracker/base.html" %}
+{% load widget_tweaks %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+
+{% block content %}
+
+<h1 class="my-4 text-2xl leading-none tracking-tight text-white md:text-3xl lg:text-4xl">{% trans "Sign In" %}</h1>
+
+{% get_providers as socialaccount_providers %}
+
+{% if socialaccount_providers %}
+<p>{% blocktrans with site.name as site_name %}Please sign in with one
+of your existing third party accounts. Or, <a href="{{ signup_url }}">sign up</a>
+for a {{ site_name }} account and sign in below:{% endblocktrans %}</p>
+
+<div class="socialaccount_ballot">
+
+  <ul class="socialaccount_providers">
+    {% include "socialaccount/snippets/provider_list.html" with process="login" %}
+  </ul>
+
+  <div class="login-or">{% trans 'or' %}</div>
+
+</div>
+
+{% include "socialaccount/snippets/login_extra.html" %}
+
+{% else %}
+<p class="mb-4 text-white">{% blocktrans %}If you have not created an account yet, then please
+  <a class="font-medium text-blue-600 dark:text-blue-500 hover:underline" href="{{ signup_url }}">sign up</a> first.{% endblocktrans %}
+</p>
+{% endif %}
+
+<form class="login w-[100%] md:w-[50%]" method="POST" action="{% url 'account_login' %}">
+  {% csrf_token %}
+
+  <div class="mb-4">
+    {{ form.login|add_label_class:"text-white mb-4" }}
+    {% render_field form.login class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" %}
+  </div>
+
+  <div class="mb-4">
+    {{ form.password|add_label_class:"text-white mb-2" }}
+    {% render_field form.password class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" %}
+  </div>
+
+  {% if redirect_field_value %}
+  <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+  {% endif %}
+  
+  <button class="primaryAction mt-2 bg-[#73B769] hover:bg-[#56964a] focus:outline-none text-white focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2" type="submit">
+    {% trans "Sign In" %}
+  </button>
+</form>
+
+{% endblock %}
