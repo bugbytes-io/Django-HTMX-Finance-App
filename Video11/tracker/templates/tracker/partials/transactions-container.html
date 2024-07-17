@@ -1,0 +1,154 @@
+{% load widget_tweaks %}
+{% load partials %}
+{% load humanize %}
+
+<!-- Define Grid container div -->
+<div class="flex flex-col-reverse md:grid md:grid-cols-4 md:gap-4"
+    id="transaction-container">
+
+    <!-- 3/4 cols for the table of transactions -->
+    <div class="col-span-3">
+        <div class="my-4">
+            <h1 class="mt-4 mb-4 prose prose-2xl text-white">
+              Totals
+            </h1>
+
+            <table class="table">
+                <thead class="text-xs text-white uppercase">
+                    <tr>
+                        <th>Total Income</th>
+                        <th>Total Expenses</th>
+                        <th>Net Income</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>${{ total_income|floatformat:2|intcomma }}</td>
+                        <td>${{ total_expenses|floatformat:2|intcomma }}</td>
+                        <td>${{ net_income|floatformat:2|intcomma }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+
+        <div class="flex justify-between items-center mt-4 mb-6">
+              
+            <h1 class="mt-8 mb-4 prose prose-2xl text-white">
+                Transactions
+            </h1>
+            
+            <a hx-get="{% url 'create-transaction' %}"
+                hx-push-url="true"
+                hx-target="#transaction-block"
+                class="cursor-pointer">
+
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="green" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                </a>
+        </div>
+
+        {% if transactions %}
+
+        <table class="table">
+            <thead class="text-xs text-white uppercase">
+                <tr>
+                    <th class="px-6 py-3">Date</th>
+                    <th class="px-6 py-3">Category</th>
+                    <th class="px-6 py-3">Type</th>
+                    <th class="px-6 py-3">Amount</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% partialdef transaction_list inline=True %}
+                    {% for transaction in transactions %}
+
+                        {% if forloop.last and transactions.has_next %}
+                            <tr hx-get="{% url 'get-transactions' %}?page={{ transactions.next_page_number}}"
+                                hx-trigger="revealed"
+                                hx-swap="afterend"
+                                hx-include="#filterform"
+                                hx-indicator="#spinner">
+                        {% else %}
+                            <tr>
+                        {% endif %}
+                            <td>{{ transaction.date }}</td>
+                            <td>{{ transaction.category }}</td>
+                            <td>{{ transaction.type }}</td>
+                            <td>{{ transaction.amount }}</td>
+                            <td class="flex items-center">
+                                <a hx-get="{% url 'update-transaction' transaction.pk %}"
+                                    hx-push-url="true"
+                                    hx-target="#transaction-block"
+                                    class="cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 mr-1">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                                    </svg>
+                                </a>
+
+                                <a hx-delete="{% url 'delete-transaction' transaction.pk %}"
+                                    hx-push-url="true"
+                                    hx-target="#transaction-block"
+                                    class="cursor-pointer"
+                                    hx-confirm="Are you sure you want to delete this transaction?">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                </a>
+                                                                
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endpartialdef %}
+            </tbody>
+        </table>
+
+        {% else %}
+
+        <p class="text-2xl text-white">
+            No transactions found
+        </p>
+
+        {% endif %}
+    </div>
+
+    <!-- 1/4 cols for the filter form -->
+    <div class="col-span-1">
+        <form hx-get="{% url 'transactions-list' %}"
+            hx-target="#transaction-container"
+            hx-swap="outerHTML"
+            id="filterform">
+            
+            <div class="mb-2 form-control">
+                {{ filter.form.transaction_type|add_label_class:"label text-white" }}
+                {% render_field filter.form.transaction_type class="select bg-gray-50 text-gray-900" %}
+            </div>
+
+            <div class="mb-2 form-control">
+                {{ filter.form.start_date|add_label_class:"label text-white" }}
+                {% render_field filter.form.start_date class="input bg-gray-50 text-gray-900" %}
+            </div>
+            
+            <div class="mb-2 form-control">
+                {{ filter.form.end_date|add_label_class:"label text-white" }}
+                {% render_field filter.form.end_date class="input bg-gray-50 text-gray-900" %}
+            </div>   
+
+            <div class="mb-4 form-control">
+                {% render_field filter.form.category class="text-green-500 border-gray-300 rounded focus:ring-green-500" %}
+            </div>
+
+            <button class="btn btn-success">
+                Filter
+            </button>        
+        </form>
+    </div>
+</div>
+
+<span id="spinner" class="loading loading-spinner loading-lg htmx-indicator">
+
+</span>
